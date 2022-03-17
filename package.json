@@ -1,12 +1,12 @@
 {
-  "name": "doorzoek-alles",
+  "name": "repo-zoek",
   "version": "0.0.1",
   "description": "",
   "license": "ISC",
   "author": "Joachim Bargsten <jw@bargsten.org> (https://bargsten.org/)",
   "main": "bin/index.js",
   "bin": {
-    "doorzoek-alles": "./bin/index.js"
+    "repo-zoek": "./bin/index.js"
   },
   "scripts": {
     "build": "npm run clean && tsc --build src && chmod +x bin/index.js",

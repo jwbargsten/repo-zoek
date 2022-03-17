@@ -105,7 +105,7 @@ async function actionInit() {
       name: "basePath",
       message: "Where should I store the cloned repos and the search index?",
       validate: (input: string): boolean => !!input,
-      default: process.env["DOORZOEK_ALLES_DIR"] || "~/repo-search",
+      default: process.env["REPO_ZOEK_DIR"] || "~/repo-search",
     },
     {
       type: "input",
@@ -118,7 +118,7 @@ async function actionInit() {
   const config = new Config(answers.basePath);
   config.init(answers);
   log.info(
-    `add "DOORZOEK_ALLES_DIR=${config.basePath}" to your env or use --dir ${config.basePath} in the CLI`
+    `add "REPO_ZOEK_DIR=${config.basePath}" to your env or use --dir ${config.basePath} in the CLI`
   );
 }
 
@@ -135,14 +135,14 @@ async function actionInit() {
   orgCmd
     .command("set")
     .description("set the organisation")
-    .requiredOption("-d, --dir <path>", "doorzoek-alles project dir", process.env["DOORZOEK_ALLES_DIR"])
+    .requiredOption("-d, --dir <path>", "repo-zoek dir", process.env["REPO_ZOEK_DIR"])
     .argument("<login>", "organisation login name")
     .action(actionOrgSet);
 
   const syncCmd = program
     .command("sync")
     .description("sync data, index and repos")
-    .requiredOption("-d, --dir <path>", "doorzoek-alles project dir", process.env["DOORZOEK_ALLES_DIR"]);
+    .requiredOption("-d, --dir <path>", "repo-zoek dir", process.env["DREPO_ZOEK_DIR"]);
   syncCmd
     .command("repolist")
     .description("query github API and cache the repo list")

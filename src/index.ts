@@ -121,6 +121,9 @@ async function actionInit() {
 }
 
 (async () => {
+  if (!process.env["GITHUB_PAT"]) {
+    log.warn("Environment variable GITHUB_PAT not set. It is needed for querying github.\n");
+  }
   program.name(pkgName).description("Lists, pulls and indexes github repos").version(pkgVersion);
 
   program.command("init").description("init repo search project").action(actionInit);

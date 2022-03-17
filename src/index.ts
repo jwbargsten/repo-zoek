@@ -34,6 +34,10 @@ async function actionSyncIndex(_opts: any, cmd: any) {
   });
 }
 
+async function actionOrgList(_opts: any, cmd: any) {
+  const config = new Config(cmd.optsWithGlobals()?.dir).load();
+  log.info(JSON.stringify(await getOrgs({ baseUrl: config.data?.ghBaseUrl }), null, 2));
+}
 async function actionOrgSet(orgLogin: any, _opts: any, cmd: any) {
   const config = new Config(cmd.optsWithGlobals()?.dir).load();
   log.info(`current org login: ${config.data?.orgLogin}`);
@@ -78,7 +82,7 @@ async function actionSyncRepolist(_: any, cmd: any) {
 
   const writeStream = fs.createWriteStream(config.repolistPath);
 
-  const repoIterator = getAllRepos({ orgLogin: config.data?.orgLogin });
+  const repoIterator = getAllRepos({ orgLogin: config.data?.orgLogin, baseUrl: config.data?.ghBaseUrl });
 
   for await (const reploListPage of repoIterator) {
     reploListPage.organization.repositories.nodes.forEach((repo) => {
@@ -96,8 +100,8 @@ async function actionInit() {
   const answers = await inquirer.prompt([
     {
       type: "input",
-      name: "apiBasePath",
-      message: "Github API base path (leave empty if you don't use enterprise)",
+      name: "ghBaseUrl",
+      message: "Github API base URL (leave empty if you don't use enterprise)",
       default: "",
     },
     {
@@ -121,22 +125,19 @@ async function actionInit() {
 }
 
 (async () => {
-  if (!process.env["GITHUB_PAT"]) {
-    log.warn("Environment variable GITHUB_PAT not set. It is needed for querying github.\n");
-  }
   program.name(pkgName).description("Lists, pulls and indexes github repos").version(pkgVersion);
 
   program.command("init").description("init repo search project").action(actionInit);
-  const orgCmd = program.command("org").description("organisation related commands");
-  orgCmd
-    .command("list")
-    .description("list organisations")
-    .action(async () => console.log(JSON.stringify(await getOrgs(), null, 2)));
+  const orgCmd = program
+    .command("org")
+    .description("organisation related commands")
+    .requiredOption("-d, --dir <path>", "repo-zoek dir", process.env["REPO_ZOEK_DIR"]);
+
+  orgCmd.command("list").description("list organisations").action(actionOrgList);
 
   orgCmd
     .command("set")
     .description("set the organisation")
-    .requiredOption("-d, --dir <path>", "repo-zoek dir", process.env["REPO_ZOEK_DIR"])
     .argument("<login>", "organisation login name")
     .action(actionOrgSet);
 
@@ -158,6 +159,16 @@ async function actionInit() {
       await actionSyncRepos(opts, cmd);
       await actionSyncIndex(opts, cmd);
     });
+
+  program.addHelpText(
+    "after",
+    `
+Zoekt resources:
+  https://github.com/sourcegraph/zoekt/blob/master/doc/design.md
+  https://github.com/sourcegraph/zoekt/blob/master/doc/faq.md
+  https://cs.bazel.build/
+`
+  );
 
   await program.parseAsync(process.argv);
 })();

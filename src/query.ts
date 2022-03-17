@@ -1,10 +1,18 @@
 /* eslint-disable no-await-in-loop */
 import { Octokit } from "@octokit/core";
 
-const PAT = process.env["GITHUB_PAT"];
+import { log } from "./utils";
 
-// const octokit = new Octokit({ auth: PAT, baseUrl: "https://api.github.com/api/v3" });
-const octokit = new Octokit({ auth: PAT });
+function initOctokit(baseUrl?: string | null): Octokit {
+  const PAT = process.env["GITHUB_PAT"];
+
+  if (!PAT) {
+    log.warn("Environment variable GITHUB_PAT not set. It is needed for querying github.");
+    throw new Error("Environment variable GITHUB_PAT not set. It is needed for querying github.");
+  }
+
+  return baseUrl ? new Octokit({ auth: PAT, baseUrl }) : new Octokit({ auth: PAT });
+}
 
 interface Repo {
   name: string;
@@ -37,7 +45,8 @@ interface RepoListPage {
   };
 }
 
-export function getOrgs() {
+export function getOrgs({ baseUrl }: { baseUrl?: string | null }) {
+  const octokit = initOctokit(baseUrl);
   return octokit.graphql(`
   query orgs {
     viewer {
@@ -63,10 +72,13 @@ const delay = (ms: number) =>
 const hasNextPage = (repos: RepoListPage) => repos?.organization?.repositories?.pageInfo?.hasNextPage ?? true;
 const afterCursor = (repos: any) => repos?.organization?.repositories?.pageInfo?.endCursor ?? null;
 
-export async function* getAllRepos({ orgLogin }: { orgLogin?: string }) {
+export async function* getAllRepos({ orgLogin, baseUrl }: { orgLogin?: string; baseUrl?: string | null }) {
   if (!orgLogin) {
     throw new Error("organisation login name");
   }
+
+  const octokit = initOctokit(baseUrl);
+
   let hasNext = true;
   let startAt = null;
   while (hasNext) {

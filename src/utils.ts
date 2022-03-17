@@ -10,7 +10,7 @@ import { name as pkgName } from "../package.json";
 export { name as pkgName, version as pkgVersion } from "../package.json";
 
 export type ConfigData = {
-  apiBasePath?: string;
+  ghBaseUrl?: string;
   orgLogin?: string;
   basePath?: string;
 };

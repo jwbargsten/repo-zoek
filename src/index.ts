@@ -117,9 +117,7 @@ async function actionInit() {
 
   const config = new Config(answers.basePath);
   config.init(answers);
-  log.info(
-    `add "REPO_ZOEK_DIR=${config.basePath}" to your env or use --dir ${config.basePath} in the CLI`
-  );
+  log.info(`add "REPO_ZOEK_DIR=${config.basePath}" to your env or use --dir ${config.basePath} in the CLI`);
 }
 
 (async () => {

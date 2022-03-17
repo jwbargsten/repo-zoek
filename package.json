@@ -8,6 +8,9 @@
   "bin": {
     "repo-zoek": "./bin/index.js"
   },
+  "files": [
+    "bin"
+  ],
   "scripts": {
     "build": "npm run clean && tsc --build src && chmod +x bin/index.js",
     "check-ts": "tsc --noEmit",
@@ -16,7 +19,8 @@
     "lint": "eslint src test",
     "lint:fix": "eslint --fix src test",
     "pretest": "npm run lint",
-    "test": "cross-env NODE_OPTIONS=\"--no-warnings --experimental-vm-modules\" jest test"
+    "test": "cross-env NODE_OPTIONS=\"--no-warnings --experimental-vm-modules\" jest test",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "@octokit/core": "^3.6.0",

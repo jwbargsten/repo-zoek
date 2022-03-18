@@ -60,3 +60,9 @@ zoekt -r -index_dir path/to/search/index 'regex file:scala'
 ```
 
 (I would alias `zoekt -r -index_dir path/to/search/index` to a more convenient command)
+
+
+## TODO
+
+* look for `.repo-zoek.json` in the current path
+* handle `GITHUB_PAT` better?

@@ -9,7 +9,11 @@ List, download and index github repos for trigram-based search on your machine u
 go install github.com/google/zoekt/cmd/zoekt-index
 go install github.com/google/zoekt/cmd/zoekt
 
-npm install --global jwbargsten/repo-zoek
+# make sure npm does not try to install the script to /usr/local/bin or similar
+npm config set prefix ~/.npm-pkg
+
+# install repo-zoek
+npm install --global https://github.com/jwbargsten/repo-zoek/releases/download/v0.0.1/repo-zoek-0.0.1.tgz
 ```
 
 make sure the go & npm bin path is in your `$PATH`. You can get the path with

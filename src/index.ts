@@ -17,9 +17,17 @@ async function actionSyncIndex(_opts: any, cmd: any) {
 
   process.chdir(config.reposPath);
 
+  const blacklist = config.data.blacklist || [];
   const repos = fs
     .readdirSync(".", { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
+    .filter((entry) => {
+      if (blacklist.includes(entry.name)) {
+        log.warn(`skipping repo ${entry.name}, blacklisted`);
+        return false;
+      }
+      return true;
+    })
     .map((entry) => entry.name);
 
   fs.mkdirSync(indexPathAbs, { recursive: true });
@@ -55,10 +63,22 @@ async function actionSyncRepos(_: any, cmd: any) {
     input: repolistStream,
   });
 
+  const { blacklist = [], maxDiskUsageInKb } = config.data;
   for await (const line of rl) {
     const repo = JSON.parse(line);
     const repoPath = path.join(config.reposPath, repo.name);
     log.info(`${repo.name} ${repo.diskUsage} (${repoPath})`);
+
+    if (blacklist.includes(repo.name)) {
+      log.warn(`skipping repo ${repo.name}, blacklisted`);
+      continue;
+    }
+
+    if (repo.diskUsage && maxDiskUsageInKb && repo.diskUsage > maxDiskUsageInKb) {
+      log.warn(`skipping repo ${repo.name}, too big (${repo.diskUsage} kb)`);
+      continue;
+    }
+
     if (repo.name && fs.existsSync(repoPath)) {
       const branch = currentBranch(repoPath);
       // https://stackoverflow.com/questions/41075972/how-to-update-a-git-shallow-clone
@@ -84,32 +104,43 @@ async function actionSyncRepolist(_: any, cmd: any) {
 
   const repoIterator = getAllRepos({ orgLogin: config.data?.orgLogin, baseUrl: config.data?.ghBaseUrl });
 
+  // const blacklist = config.data.blacklist || [];
+
   for await (const reploListPage of repoIterator) {
     reploListPage.organization.repositories.nodes.forEach((repo) => {
+      /*
+      not needed for now
+      if (blacklist.includes(repo.name)) {
+        log.warn(`\nskipping repo ${repo.name}, blacklisted`);
+        return;
+      }
+      */
       writeStream.write(JSON.stringify(repo) + "\n", "utf8");
+      process.stdout.write(".");
     });
   }
 
   writeStream.on("finish", () => {
+    process.stdout.write("\n");
     log.info(`wrote all repo data to ${config.repolistPath}`);
   });
   writeStream.end();
 }
 
-async function actionInit() {
+async function actionInit(dir: any) {
   const answers = await inquirer.prompt([
-    {
-      type: "input",
-      name: "ghBaseUrl",
-      message: "Github API base URL (leave empty if you don't use enterprise)",
-      default: "",
-    },
     {
       type: "input",
       name: "basePath",
       message: "Where should I store the cloned repos and the search index?",
       validate: (input: string): boolean => !!input,
-      default: process.env["REPO_ZOEK_DIR"] || "~/repo-search",
+      default: dir || process.env["REPO_ZOEK_DIR"] || "~/repo-search",
+    },
+    {
+      type: "input",
+      name: "ghBaseUrl",
+      message: "Github API base URL (leave empty if you don't use enterprise)",
+      default: "",
     },
     {
       type: "input",
@@ -127,7 +158,11 @@ async function actionInit() {
 (async () => {
   program.name(pkgName).description("Lists, pulls and indexes github repos").version(pkgVersion);
 
-  program.command("init").description("init repo search project").action(actionInit);
+  program
+    .command("init")
+    .description("init repo search project")
+    .argument("[dir]", "repo-zoek project dir")
+    .action(actionInit);
   const orgCmd = program
     .command("org")
     .description("organisation related commands")

@@ -13,6 +13,8 @@ export type ConfigData = {
   ghBaseUrl?: string;
   orgLogin?: string;
   basePath?: string;
+  blacklist?: string[];
+  maxDiskUsageInKb?: number;
 };
 
 export const log = {

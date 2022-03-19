@@ -15,7 +15,7 @@ npm config set prefix ~/.npm-pkg
 # install repo-zoek
 npm install --global <https://link-to-latest-release.tgz>
 ```
-(see release page for newest version)
+([see release page for newest version](https://github.com/jwbargsten/repo-zoek/releases/latest))
 
 make sure the go & npm bin path is in your `$PATH`. You can get the path with
 

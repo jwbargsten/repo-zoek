@@ -1,6 +1,6 @@
 {
   "name": "repo-zoek",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "",
   "license": "Apache-2.0",
   "author": "Joachim Bargsten <jw@bargsten.org> (https://bargsten.org/)",
@@ -20,7 +20,8 @@
     "lint:fix": "eslint --fix src test",
     "pretest": "npm run lint",
     "test": "cross-env NODE_OPTIONS=\"--no-warnings --experimental-vm-modules\" jest test",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "dist": "npm build && npm pack"
   },
   "dependencies": {
     "@octokit/core": "^3.6.0",

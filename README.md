@@ -13,8 +13,9 @@ go install github.com/google/zoekt/cmd/zoekt
 npm config set prefix ~/.npm-pkg
 
 # install repo-zoek
-npm install --global https://github.com/jwbargsten/repo-zoek/releases/download/v0.0.1/repo-zoek-0.0.1.tgz
+npm install --global <https://link-to-latest-release.tgz>
 ```
+(see release page for newest version)
 
 make sure the go & npm bin path is in your `$PATH`. You can get the path with
 

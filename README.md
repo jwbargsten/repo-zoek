@@ -78,6 +78,12 @@ zoekt -r -index_dir path/to/search/index 'regex file:scala'
 
 (I would alias `zoekt -r -index_dir path/to/search/index` to a more convenient command)
 
+## Other stuff you can do with the data
+
+### Iterate through the repo list and execute a command
+```sh
+jq -r '.name' </path/to/repos.ndjson  | xargs -IREPO echo "abc REPO def"
+```
 
 ## TODO
 

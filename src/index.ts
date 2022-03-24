@@ -53,7 +53,8 @@ async function actionOrgSet(orgLogin: any, _opts: any, cmd: any) {
   config.save(data);
 }
 
-async function actionSyncRepos(_: any, cmd: any) {
+async function actionSyncRepos(opts: any, cmd: any) {
+  const withHistory = !!opts?.full;
   const config = new Config(cmd.optsWithGlobals()?.dir).load();
   fs.mkdirSync(config.reposPath, { recursive: true });
 
@@ -79,7 +80,9 @@ async function actionSyncRepos(_: any, cmd: any) {
       continue;
     }
 
-    if (repo.name && fs.existsSync(repoPath)) {
+    if (repo.name && fs.existsSync(repoPath) && withHistory) {
+      execGit(["pull"], repoPath);
+    } else if (repo.name && fs.existsSync(repoPath)) {
       const branch = currentBranch(repoPath);
       // https://stackoverflow.com/questions/41075972/how-to-update-a-git-shallow-clone
       if (!execGit(["fetch", "--depth", "1"], repoPath)) {
@@ -89,10 +92,12 @@ async function actionSyncRepos(_: any, cmd: any) {
         continue;
       }
       execGit(["clean", "-dfx"], repoPath);
+    } else if (repo.name && repo.sshUrl && withHistory) {
+      execGit(["clone", repo.sshUrl, repoPath]);
     } else if (repo.name && repo.sshUrl) {
       execGit(["clone", "--single-branch", "--filter=blob:none", "--depth=1", repo.sshUrl, repoPath]);
     } else {
-      log.warn(`clould not clone ${repo.name}`);
+      log.warn(`clould not clone/pull ${repo.name}`);
     }
   }
 }
@@ -184,11 +189,22 @@ async function actionInit(dir: any) {
     .command("repolist")
     .description("query github API and cache the repo list")
     .action(actionSyncRepolist);
-  syncCmd.command("repos").description("clone or pull repos from cached repo list").action(actionSyncRepos);
+  syncCmd
+    .command("repos")
+    .description("clone or pull repos from cached repo list")
+    .option(
+      "-f --full",
+      "does a full (with all history & branches) checkout/pull instead of only the newest commit on master"
+    )
+    .action(actionSyncRepos);
   syncCmd.command("index").description("update the zoekt index").action(actionSyncIndex);
   syncCmd
     .command("all")
     .description("run sync repolist, repos & index")
+    .option(
+      "-f --full",
+      "does a full (with all history & branches) checkout/pull instead of only the newest commit on master"
+    )
     .action(async (opts: any, cmd: any) => {
       await actionSyncRepolist(opts, cmd);
       await actionSyncRepos(opts, cmd);

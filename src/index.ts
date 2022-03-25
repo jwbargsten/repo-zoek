@@ -200,7 +200,7 @@ async function actionInit(dir: any) {
     .command("set")
     .description("set the organisation")
     .argument("<login>", "organisation login name")
-    .argument("[dir]", "repo-zoek project dir",  process.env["REPO_ZOEK_DIR"])
+    .argument("[dir]", "repo-zoek project dir")
     .action(actionOrgSet);
 
   const syncCmd = program.command("sync").description("sync data, index and repos");
@@ -212,7 +212,7 @@ async function actionInit(dir: any) {
   syncCmd
     .command("repos")
     .description("clone or pull repos from cached repo list")
-    .argument("<dir>", "repo-zoek project dir", process.env["REPO_ZOEK_DIR"])
+    .argument("[dir]", "repo-zoek project dir")
     .option(
       "-f --full",
       "does a full (with all history & branches) checkout/pull instead of only the newest commit on master"

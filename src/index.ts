@@ -5,14 +5,29 @@ import fs from "node:fs";
 import path from "node:path";
 import * as readline from "node:readline";
 
-import { program } from "commander";
+import { InvalidArgumentError, program } from "commander";
 import inquirer from "inquirer";
 
 import { getAllRepos, getOrgs } from "./query";
-import { Config, currentBranch, execGit, log, pkgName, pkgVersion } from "./utils";
+import { Config, currentBranch, execGit, expandPath, log, pkgName, pkgVersion } from "./utils";
 
-async function actionSyncIndex(_opts: any, cmd: any) {
-  const config = new Config(cmd.optsWithGlobals()?.dir).load();
+function parseProjectDir(dir: any): string {
+  const d = dir || process.env["REPO_ZOEK_DIR"];
+
+  if (!d) {
+    program.error("no repo zoek project dir supplied");
+  }
+  const configFile = path.join(expandPath(d), Config.configFileName);
+  if (!fs.existsSync(configFile)) {
+    throw new InvalidArgumentError(`repo zoek dir not valid, config file ${configFile} not found`);
+  }
+
+  return dir;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function actionSyncIndex(dir: any, _opts: any, _cmd: any) {
+  const config = new Config(parseProjectDir(dir)).load();
   const indexPathAbs = path.resolve(config.indexPath);
 
   process.chdir(config.reposPath);
@@ -42,20 +57,24 @@ async function actionSyncIndex(_opts: any, cmd: any) {
   });
 }
 
-async function actionOrgList(_opts: any, cmd: any) {
-  const config = new Config(cmd.optsWithGlobals()?.dir).load();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function actionOrgList(dir: any, _opts: any, _cmd: any) {
+  const config = new Config(parseProjectDir(dir)).load();
   log.info(JSON.stringify(await getOrgs({ baseUrl: config.data?.ghBaseUrl }), null, 2));
 }
-async function actionOrgSet(orgLogin: any, _opts: any, cmd: any) {
-  const config = new Config(cmd.optsWithGlobals()?.dir).load();
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function actionOrgSet(orgLogin: any, dir: any, _opts: any, _cmd: any) {
+  const config = new Config(parseProjectDir(dir)).load();
   log.info(`current org login: ${config.data?.orgLogin}`);
   const data = { ...config.data, orgLogin };
   config.save(data);
 }
 
-async function actionSyncRepos(opts: any, cmd: any) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function actionSyncRepos(dir: any, opts: any, _cmd: any) {
   const withHistory = !!opts?.full;
-  const config = new Config(cmd.optsWithGlobals()?.dir).load();
+  const config = new Config(parseProjectDir(dir)).load();
   fs.mkdirSync(config.reposPath, { recursive: true });
 
   const repolistStream = fs.createReadStream(config.repolistPath);
@@ -102,8 +121,9 @@ async function actionSyncRepos(opts: any, cmd: any) {
   }
 }
 
-async function actionSyncRepolist(_: any, cmd: any) {
-  const config = new Config(cmd.optsWithGlobals()?.dir).load();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function actionSyncRepolist(dir: any, _opts: any, _cmd: any) {
+  const config = new Config(parseProjectDir(dir)).load();
 
   const writeStream = fs.createWriteStream(config.repolistPath);
 
@@ -157,7 +177,7 @@ async function actionInit(dir: any) {
 
   const config = new Config(answers.basePath);
   config.init(answers);
-  log.info(`add "REPO_ZOEK_DIR=${config.basePath}" to your env or use --dir ${config.basePath} in the CLI`);
+  log.info(`add "REPO_ZOEK_DIR=${config.basePath}" to your env or use ${config.basePath} in the CLI`);
 }
 
 (async () => {
@@ -166,32 +186,33 @@ async function actionInit(dir: any) {
   program
     .command("init")
     .description("init repo search project")
-    .argument("[dir]", "repo-zoek project dir")
+    .argument("[dir]", "repo-zoek project dir", process.env["REPO_ZOEK_DIR"])
     .action(actionInit);
-  const orgCmd = program
-    .command("org")
-    .description("organisation related commands")
-    .requiredOption("-d, --dir <path>", "repo-zoek dir", process.env["REPO_ZOEK_DIR"]);
+  const orgCmd = program.command("org").description("organisation related commands");
 
-  orgCmd.command("list").description("list organisations").action(actionOrgList);
+  orgCmd
+    .command("list")
+    .description("list organisations")
+    .argument("[dir]", "repo-zoek project dir")
+    .action(actionOrgList);
 
   orgCmd
     .command("set")
     .description("set the organisation")
     .argument("<login>", "organisation login name")
+    .argument("[dir]", "repo-zoek project dir",  process.env["REPO_ZOEK_DIR"])
     .action(actionOrgSet);
 
-  const syncCmd = program
-    .command("sync")
-    .description("sync data, index and repos")
-    .requiredOption("-d, --dir <path>", "repo-zoek dir", process.env["DREPO_ZOEK_DIR"]);
+  const syncCmd = program.command("sync").description("sync data, index and repos");
   syncCmd
     .command("repolist")
     .description("query github API and cache the repo list")
+    .argument("[dir]", "repo-zoek project dir")
     .action(actionSyncRepolist);
   syncCmd
     .command("repos")
     .description("clone or pull repos from cached repo list")
+    .argument("<dir>", "repo-zoek project dir", process.env["REPO_ZOEK_DIR"])
     .option(
       "-f --full",
       "does a full (with all history & branches) checkout/pull instead of only the newest commit on master"
@@ -201,14 +222,15 @@ async function actionInit(dir: any) {
   syncCmd
     .command("all")
     .description("run sync repolist, repos & index")
+    .argument("[dir]", "repo-zoek project dir")
     .option(
       "-f --full",
       "does a full (with all history & branches) checkout/pull instead of only the newest commit on master"
     )
-    .action(async (opts: any, cmd: any) => {
-      await actionSyncRepolist(opts, cmd);
-      await actionSyncRepos(opts, cmd);
-      await actionSyncIndex(opts, cmd);
+    .action(async (dir: any, opts: any, cmd: any) => {
+      await actionSyncRepolist(dir, opts, cmd);
+      await actionSyncRepos(dir, opts, cmd);
+      await actionSyncIndex(dir, opts, cmd);
     });
 
   program.addHelpText(

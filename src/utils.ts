@@ -24,6 +24,9 @@ export const log = {
 };
 
 export function expandPath(p: string): string {
+  if (!p) {
+    return "";
+  }
   const parts = p.split(path.sep);
   if (parts[0] === "~") {
     parts[0] = os.homedir();
@@ -32,7 +35,7 @@ export function expandPath(p: string): string {
 }
 
 export class Config {
-  static configFileName = `.${pkgName}.json`;
+  static configFileName = `${pkgName}.conf.json`;
 
   static repolistFileName = "repos.ndjson";
 
@@ -99,6 +102,7 @@ export function currentBranch(repoPath: string) {
 
 export function execGit(args: string[], repoPath: string | null = null): boolean {
   const fullArgs = repoPath ? ["-C", repoPath, ...args] : args;
+  // log.info(["git", ...fullArgs].join(" "));
   const git = spawnSync("git", fullArgs, {
     stdio: ["ignore", process.stdout, process.stderr],
     encoding: "utf8",

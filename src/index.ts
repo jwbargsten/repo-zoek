@@ -5,7 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import * as readline from "node:readline";
 
-import { InvalidArgumentError, program } from "commander";
+import { program } from "commander";
 import inquirer from "inquirer";
 
 import { getAllRepos, getOrgs } from "./query";
@@ -19,10 +19,10 @@ function parseProjectDir(dir: any): string {
   }
   const configFile = path.join(expandPath(d), Config.configFileName);
   if (!fs.existsSync(configFile)) {
-    throw new InvalidArgumentError(`repo zoek dir not valid, config file ${configFile} not found`);
+    program.error(`repo zoek dir not valid, config file ${configFile} not found`);
   }
 
-  return dir;
+  return d;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

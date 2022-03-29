@@ -218,7 +218,11 @@ async function actionInit(dir: any) {
       "does a full (with all history & branches) checkout/pull instead of only the newest commit on master"
     )
     .action(actionSyncRepos);
-  syncCmd.command("index").description("update the zoekt index").action(actionSyncIndex);
+  syncCmd
+    .command("index")
+    .description("update the zoekt index")
+    .argument("[dir]", "repo-zoek project dir")
+    .action(actionSyncIndex);
   syncCmd
     .command("all")
     .description("run sync repolist, repos & index")

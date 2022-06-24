@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
+# az extension add --name azure-devops
+# az devops configure --defaults organization=https://dev.azure.com/.../
+# az devops configure --defaults project=...
+# python contrib/az-devops.py >~/search/repos.ndjson
+
 import os
 import logging
 import subprocess as sp
 import json
-from pathlib import Path
 
 log_dfmt = "%Y-%m-%d %H:%M:%S"
 log_fmt = "%(asctime)s - %(levelname)-8s - %(name)s.%(funcName)s: %(message)s"
@@ -26,18 +30,19 @@ def az_cmd(cmd, capture=True):
 
 res = az_cmd(["az", "repos", "list"])
 
-repos = [(repo["name"], repo["sshUrl"]) for repo in res]
-blacklist = [
+repos = [
+    {
+        **repo,
+        "name": repo["name"],
+        "sshUrl": repo["sshUrl"],
+        "url": repo["webUrl"],
+        "diskUsage": repo["size"],
+    }
+    for repo in res
+    if not repo["isDisabled"]
 ]
-repos = [r for r in repos if r[0] not in blacklist]
-
-
-# {"name":"blah","createdAt":"2010-11-01T08:04:31Z","diskUsage":156,"isEmpty":false,"sshUrl":"git@github.com:xebia/logstore.git","url":"https://github.com/xebia/logstore"}
+blacklist = []
+repos = [r for r in repos if r["name"] not in blacklist]
 
 for repo in repos:
-    if Path(repo[0]).exists():
-        logger.error(f"{repo[0]} does already exist")
-        sp.run(["git", "-C", repo[0], "pull"])
-        continue
-    logger.info(f"{repo[0]} -> {repo[1]}")
-    sp.run(["git", "clone", repo[1]], env=os.environ, check=True)
+    print(json.dumps(repo))

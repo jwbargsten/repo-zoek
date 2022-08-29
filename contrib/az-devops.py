@@ -34,9 +34,9 @@ repos = [
     {
         **repo,
         "name": repo["name"],
-        "sshUrl": repo["sshUrl"],
+        "cloneUrl": repo["sshUrl"],
         "url": repo["webUrl"],
-        "diskUsage": repo["size"],
+        "diskUsage": repo["size"]/1024,
     }
     for repo in res
     if not repo["isDisabled"]

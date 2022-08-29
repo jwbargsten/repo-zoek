@@ -111,10 +111,10 @@ async function actionSyncRepos(dir: any, opts: any, _cmd: any) {
         continue;
       }
       execGit(["clean", "-dfx"], repoPath);
-    } else if (repo.name && repo.sshUrl && withHistory) {
-      execGit(["clone", repo.sshUrl, repoPath]);
-    } else if (repo.name && repo.sshUrl) {
-      execGit(["clone", "--single-branch", "--filter=blob:none", "--depth=1", repo.sshUrl, repoPath]);
+    } else if (repo.name && repo.cloneUrl && withHistory) {
+      execGit(["clone", repo.cloneUrl, repoPath]);
+    } else if (repo.name && repo.cloneUrl) {
+      execGit(["clone", "--single-branch", "--filter=blob:none", "--depth=1", repo.cloneUrl, repoPath]);
     } else {
       log.warn(`clould not clone/pull ${repo.name}`);
     }

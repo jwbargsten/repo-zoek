@@ -26,7 +26,7 @@ def az_cmd(cmd, capture=True):
 
 res = az_cmd(["az", "repos", "list"])
 
-repos = [(repo["name"], repo["sshUrl"]) for repo in res]
+repos = [(repo["name"], repo["cloneUrl"]) for repo in res]
 blacklist = []
 repos = [r for r in repos if r[0] not in blacklist]
 

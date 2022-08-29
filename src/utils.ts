@@ -15,6 +15,7 @@ export type ConfigData = {
   basePath?: string;
   blacklist?: string[];
   maxDiskUsageInKb?: number;
+  cloneUrlField: string;
 };
 
 export const log = {
@@ -58,7 +59,7 @@ export class Config {
     this.reposPath = path.join(this.basePath, "repos");
     this.indexPath = path.join(this.basePath, "index");
 
-    this.data = {};
+    this.data = { cloneUrlField: "sshUrl"};
   }
 
   init(data: ConfigData) {

@@ -26,7 +26,7 @@ interface Repo {
   primaryLanguage: {
     name: string;
   };
-  sshUrl: string;
+  cloneUrl: string;
   url: string;
 }
 
@@ -73,7 +73,7 @@ const hasNextPage = (repos: RepoListPage) => repos?.organization?.repositories?.
 const afterCursor = (repos: any) => repos?.organization?.repositories?.pageInfo?.endCursor ?? null;
 
 //  https://docs.github.com/en/graphql/overview/explorer
-export async function* getAllRepos({ orgLogin, baseUrl }: { orgLogin?: string; baseUrl?: string | null }) {
+export async function* getAllRepos({ orgLogin, baseUrl, cloneUrlField = "sshUrl" }: { orgLogin?: string; baseUrl?: string | null; cloneUrlField: string }) {
   if (!orgLogin) {
     throw new Error("organisation login name");
   }
@@ -103,7 +103,7 @@ export async function* getAllRepos({ orgLogin, baseUrl }: { orgLogin?: string; b
             primaryLanguage {
               name
             }
-            sshUrl
+            ${cloneUrlField}: cloneUrl
             url
           }
           pageInfo {

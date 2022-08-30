@@ -25,6 +25,17 @@ function parseProjectDir(dir: any): string {
   return d;
 }
 
+function checkBlacklist(blacklist: string[], name: string) {
+  return blacklist.some((ble) => {
+    if (ble.startsWith("/") && ble.endsWith("/")) {
+      // we have a regex
+      const re = new RegExp(ble.substring(1, ble.length - 1));
+      return re.test(name);
+    }
+    return ble === name;
+  });
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function actionSyncIndex(dir: any, _opts: any, _cmd: any) {
   const config = new Config(parseProjectDir(dir)).load();
@@ -37,7 +48,7 @@ async function actionSyncIndex(dir: any, _opts: any, _cmd: any) {
     .readdirSync(".", { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .filter((entry) => {
-      if (blacklist.includes(entry.name)) {
+      if (checkBlacklist(blacklist, entry.name)) {
         log.warn(`skipping repo ${entry.name}, blacklisted`);
         return false;
       }
@@ -89,7 +100,7 @@ async function actionSyncRepos(dir: any, opts: any, _cmd: any) {
     const repoPath = path.join(config.reposPath, repo.name);
     log.info(`${repo.name} ${repo.diskUsage} (${repoPath})`);
 
-    if (blacklist.includes(repo.name)) {
+    if (checkBlacklist(blacklist, repo.name)) {
       log.warn(`skipping repo ${repo.name}, blacklisted`);
       continue;
     }
@@ -135,7 +146,7 @@ async function actionSyncRepolist(dir: any, _opts: any, _cmd: any) {
     reploListPage.organization.repositories.nodes.forEach((repo) => {
       /*
       not needed for now
-      if (blacklist.includes(repo.name)) {
+      if (checkBlacklist(blacklist, repo.name)) {
         log.warn(`\nskipping repo ${repo.name}, blacklisted`);
         return;
       }

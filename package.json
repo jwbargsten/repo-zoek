@@ -15,13 +15,13 @@
     "build": "npm run clean && tsc --build src && chmod +x bin/index.js",
     "check-ts": "tsc --noEmit",
     "clean": "rm -rf bin; mkdir -p bin",
+    "dist": "npm build && npm pack",
     "fmt": "prettier --write .",
     "lint": "eslint src test",
     "lint:fix": "eslint --fix src test",
-    "pretest": "npm run lint",
-    "test": "cross-env NODE_OPTIONS=\"--no-warnings --experimental-vm-modules\" jest test",
     "prepare": "npm run build",
-    "dist": "npm build && npm pack"
+    "pretest": "npm run lint",
+    "test": "cross-env NODE_OPTIONS=\"--no-warnings --experimental-vm-modules\" jest test"
   },
   "dependencies": {
     "@octokit/core": "^3.6.0",

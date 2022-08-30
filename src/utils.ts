@@ -59,7 +59,7 @@ export class Config {
     this.reposPath = path.join(this.basePath, "repos");
     this.indexPath = path.join(this.basePath, "index");
 
-    this.data = { cloneUrlField: "sshUrl"};
+    this.data = { cloneUrlField: "sshUrl" };
   }
 
   init(data: ConfigData) {

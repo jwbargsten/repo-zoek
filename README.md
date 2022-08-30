@@ -5,11 +5,12 @@ List, download and index github repos for trigram-based search on your machine u
 
 ## Preparation
 
-* Install node >= 12
-* You need to have [golang](https://go.dev/doc/install) installed
-* You need a [github personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) and it needs to be accessible in the environment as `GITHUB_PAT` when running
+- Install node >= 12
+- You need to have [golang](https://go.dev/doc/install) installed
+- You need a [github personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) and it needs to be accessible in the environment as `GITHUB_PAT` when running
 
 `repo-zoek`.
+
 ## Installation
 
 ```sh
@@ -18,8 +19,8 @@ go install github.com/google/zoekt/cmd/zoekt@latest
 
 # make sure npm does not try to install the script to /usr/local/bin or similar
 npm config set prefix ~/.npm-pkg
-# (TAKE CARE: if you use nvm or similar, 
-#  make sure that your prefix setting does 
+# (TAKE CARE: if you use nvm or similar,
+#  make sure that your prefix setting does
 #  not interfere with nvm. In case of nvm, you
 #  can probably skip it.)
 
@@ -27,6 +28,7 @@ npm config set prefix ~/.npm-pkg
 npm install --global <https://link-to-latest-release.tgz>
 # (SEE BELOW for the releases page)
 ```
+
 ([see release page for newest version](https://github.com/jwbargsten/repo-zoek/releases/latest))
 
 make sure the go & npm bin path is in your `$PATH`. You can get the path with
@@ -81,11 +83,12 @@ zoekt -r -index_dir path/to/search/index 'regex file:scala'
 ## Other stuff you can do with the data
 
 ### Iterate through the repo list and execute a command
+
 ```sh
 jq -r '.name' </path/to/repos.ndjson  | xargs -IREPO echo "abc REPO def"
 ```
 
 ## TODO
 
-* look for `.repo-zoek.json` in the current path
-* handle `GITHUB_PAT` better?
+- look for `.repo-zoek.json` in the current path
+- handle `GITHUB_PAT` better?

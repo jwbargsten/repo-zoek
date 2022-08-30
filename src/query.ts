@@ -73,7 +73,15 @@ const hasNextPage = (repos: RepoListPage) => repos?.organization?.repositories?.
 const afterCursor = (repos: any) => repos?.organization?.repositories?.pageInfo?.endCursor ?? null;
 
 //  https://docs.github.com/en/graphql/overview/explorer
-export async function* getAllRepos({ orgLogin, baseUrl, cloneUrlField = "sshUrl" }: { orgLogin?: string; baseUrl?: string | null; cloneUrlField: string }) {
+export async function* getAllRepos({
+  orgLogin,
+  baseUrl,
+  cloneUrlField = "sshUrl",
+}: {
+  orgLogin?: string;
+  baseUrl?: string | null;
+  cloneUrlField?: string;
+}) {
   if (!orgLogin) {
     throw new Error("organisation login name");
   }

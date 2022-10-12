@@ -123,8 +123,10 @@ async function actionSyncRepos(dir: any, opts: any, _cmd: any) {
       }
       execGit(["clean", "-dfx"], repoPath);
     } else if (repo.name && repo.cloneUrl && withHistory) {
+      fs.mkdirSync(repoPath, {recursive: true})
       execGit(["clone", repo.cloneUrl, repoPath]);
     } else if (repo.name && repo.cloneUrl) {
+      fs.mkdirSync(repoPath, {recursive: true})
       execGit(["clone", "--single-branch", "--filter=blob:none", "--depth=1", repo.cloneUrl, repoPath]);
     } else {
       log.warn(`clould not clone/pull ${repo.name}`);

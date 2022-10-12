@@ -15,7 +15,7 @@
     "build": "npm run clean && tsc --build src && chmod +x bin/index.js",
     "check-ts": "tsc --noEmit",
     "clean": "rm -rf bin; mkdir -p bin",
-    "dist": "npm build && npm pack",
+    "dist": "npm run build && npm pack",
     "fmt": "prettier --write .",
     "lint": "eslint src test",
     "lint:fix": "eslint --fix src test",

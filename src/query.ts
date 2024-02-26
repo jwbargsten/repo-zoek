@@ -70,7 +70,7 @@ const delay = (ms: number) =>
   });
 
 const hasNextPage = (repos: RepoListPage) => repos?.organization?.repositories?.pageInfo?.hasNextPage ?? true;
-const afterCursor = (repos: any) => repos?.organization?.repositories?.pageInfo?.endCursor ?? null;
+const afterCursor = (repos: RepoListPage) => repos?.organization?.repositories?.pageInfo?.endCursor ?? null;
 
 //  https://docs.github.com/en/graphql/overview/explorer
 export async function* getAllRepos({

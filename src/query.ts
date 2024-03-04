@@ -111,7 +111,7 @@ export async function* getAllRepos({
             primaryLanguage {
               name
             }
-            ${cloneUrlField}: cloneUrl
+            cloneUrl: ${cloneUrlField}
             url
           }
           pageInfo {

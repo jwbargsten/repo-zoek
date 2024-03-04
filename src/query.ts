@@ -121,6 +121,11 @@ export async function* getAllRepos({
           totalCount
         }
       }
+      rateLimit {
+        cost
+        remaining
+        resetAt
+      }
     }`,
       { orgLogin, after: startAt, first: 80 }
     );
